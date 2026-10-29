@@ -1,0 +1,3 @@
+/* rooms.js — 18 espaços e slugs */
+const slug=n=>n.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const ROOMS=['Espaço de Convivência','Sala Curitiba','Sala Cascavel','Sala Paraná','Sala Maringá','Espaço Araucária','Sala Londrina','Sala Guarapuava','Sala Ponta Grossa','Sala Francisco Beltrão','Sala Toledo','Sala Apucarana','Auditório Mario De Mari','Auditório Caio Amaral','Átrio I','Átrio II','Átrio III','Outros'].map(nome=>({id:nome==='Espaço de Convivência'?'espaco-convivencia':slug(nome),nome,slug:nome==='Espaço de Convivência'?'espaco-convivencia':slug(nome),ativa:true}));

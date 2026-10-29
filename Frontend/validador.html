@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Validador de Vouchers</title>
+    <!-- Inclui o CSS do Bootstrap para estilização -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <style>
+      .container {
+        max-width: 600px;
+        margin-top: 40px;
+      }
+      .header-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem 1rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+      .form-section {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2rem;
+      }
+      .result-box {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: 500;
+      }
+      .valid {
+        background-color: #d4edda;
+        color: #155724;
+        border: 2px solid #c3e6cb;
+      }
+      .invalid {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 2px solid #f5c6cb;
+      }
+      .waiting {
+        background-color: #e2e3e5;
+        color: #383d41;
+        border: 2px solid #d6d8db;
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 12px 24px;
+        font-weight: 500;
+      }
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        transform: translateY(-1px);
+      }
+      .form-control {
+        padding: 12px 16px;
+        font-size: 1.1rem;
+      }
+      .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+      }
+      body {
+        background-color: #f8f9fa;
+        transition: background-color 0.1s;
+      }
+
+      /* 🔥 ANIMAÇÕES DE ALERTA VISUAL (TELA PISCANDO) */
+      @keyframes flashError {
+        0% { background-color: #f8f9fa; }
+        25% { background-color: #ffcdd2; }
+        50% { background-color: #f8f9fa; }
+        75% { background-color: #ffcdd2; }
+        100% { background-color: #f8f9fa; }
+      }
+      .flash-error-bg {
+        animation: flashError 0.6s ease-in-out;
+      }
+
+      @keyframes flashSuccess {
+        0% { background-color: #f8f9fa; }
+        50% { background-color: #d4edda; }
+        100% { background-color: #f8f9fa; }
+      }
+      .flash-success-bg {
+        animation: flashSuccess 0.5s ease-in-out;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Cabeçalho -->
+      <div class="header-section">
+        <h1 class="mb-3">Validador de Vouchers</h1>
+        <p class="mb-0">
+          Digite o código do voucher ou utilize o leitor de código de barras
+        </p>
+      </div>
+
+      <!-- Formulário de Validação -->
+      <div class="form-section">
+        <form id="form-leitor-barra">
+          <div class="mb-4">
+            <label for="codigoBarra" class="form-label"
+              >Código do Voucher</label
+            >
+            <input
+              type="text"
+              class="form-control form-control-lg"
+              id="codigoBarra"
+              placeholder="Aguardando leitura do código de barras..."
+              required
+              autofocus
+            />
+            <div class="form-text">
+              Pressione o botão abaixo ou pressione Enter para validar
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 py-3">
+            <i class="bi bi-check-circle me-2"></i>Validar Voucher
+          </button>
+        </form>
+      </div>
+
+      <!-- Resultado da Validação -->
+      <div id="qr-result" class="result-box waiting">
+        <p>Aguardando leitura...</p>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Nosso código JavaScript para a lógica -->
+    <script src="js/validador.js"></script>
+  </body>
+</html>

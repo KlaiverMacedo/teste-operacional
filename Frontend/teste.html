@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Partículas Interativas</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #0d0d0d;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="particles"></canvas>
+
+    <script>
+      const canvas = document.getElementById("particles");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      let particles = [];
+      let backgroundParticles = [];
+
+      class Particle {
+        constructor(x, y, color, size = 3, lifetime = 1) {
+          this.x = x;
+          this.y = y;
+          this.size = size;
+          this.color = color;
+          this.alpha = 1;
+          this.lifetime = lifetime;
+          this.speedX = (Math.random() - 0.5) * 2;
+          this.speedY = (Math.random() - 0.5) * 2;
+        }
+
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          this.alpha -= 0.02 * this.lifetime;
+          if (this.alpha <= 0) this.alpha = 0;
+        }
+
+        draw() {
+          ctx.save();
+          ctx.globalAlpha = this.alpha;
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      function handleParticles(list) {
+        for (let i = 0; i < list.length; i++) {
+          list[i].update();
+          list[i].draw();
+
+          if (list[i].alpha <= 0) {
+            list.splice(i, 1);
+            i--;
+          }
+        }
+      }
+
+      // Criar partículas de fundo
+      function initBackground() {
+        backgroundParticles = [];
+        for (let i = 0; i < 100; i++) {
+          let x = Math.random() * canvas.width;
+          let y = Math.random() * canvas.height;
+          backgroundParticles.push(
+            new Particle(x, y, "rgba(0,255,255,0.6)", 2, 0.2)
+          );
+        }
+      }
+
+      // Rastro do mouse
+      window.addEventListener("mousemove", (e) => {
+        for (let i = 0; i < 2; i++) {
+          particles.push(new Particle(e.x, e.y, "cyan", 3, 1));
+        }
+      });
+
+      // Clique explosão
+      window.addEventListener("click", (e) => {
+        for (let i = 0; i < 30; i++) {
+          particles.push(new Particle(e.x, e.y, "cyan", 4, 1));
+        }
+      });
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        handleParticles(backgroundParticles); // partículas de fundo
+        handleParticles(particles); // partículas interativas
+
+        requestAnimationFrame(animate);
+      }
+
+      initBackground();
+      animate();
+
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initBackground();
+      });
+    </script>
+  </body>
+</html>

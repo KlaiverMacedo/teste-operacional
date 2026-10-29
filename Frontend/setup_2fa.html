@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Configurar 2FA</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: #f0f2f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+      }
+      .auth-card {
+        background: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 500px;
+        text-align: center;
+      }
+      #qrcode-img {
+        margin: 20px auto;
+        border: 1px solid #ccc;
+        padding: 10px;
+      }
+      #qrcode-img img {
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="auth-card">
+      <h3 class="mb-3">Verificação de Duas Etapas (2FA)</h3>
+      <p>
+        <strong>Primeiro Acesso:</strong> Escaneie o QR Code abaixo com o
+        **Microsoft Authenticator** (ou outro app TOTP).
+      </p>
+
+      <!-- Div que receberá a imagem do QR Code em Base64 -->
+      <div id="qrcode-img">
+        <p>Carregando QR Code...</p>
+      </div>
+
+      <p class="mt-3">
+        Em seguida, insira o código de 6 dígitos que o aplicativo gerar.
+      </p>
+
+      <form id="form-verify-setup">
+        <div class="mb-3 d-flex justify-content-center">
+          <input
+            type="text"
+            class="form-control form-control-lg text-center"
+            id="totpCode"
+            maxlength="6"
+            style="width: 150px"
+            placeholder="Código TOTP"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">
+          Verificar e Ativar 2FA
+        </button>
+        <div id="setup-feedback" class="mt-3 text-danger"></div>
+      </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="setup_2fa.js"></script>
+  </body>
+</html>

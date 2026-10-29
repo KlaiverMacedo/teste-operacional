@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:; connect-src 'self' http://127.0.0.1:3005 http://localhost:3005 http://10.150.49.253:3005 https://* http://*; img-src 'self' data: https:;">
+
+    <title>Sistema de Vouchers</title>
+    <link rel="icon" type="image/png" href="assets_img/icone.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <script src="/js/JsBarcode.all.min.js"></script>
+    <link rel="stylesheet" href="/style.css" />
+
+        <style>
+        *, *::before, *::after {
+            font-family: 'Josefin Sans', sans-serif !important;
+        }
+        
+        html, body { 
+            overflow-x: hidden; 
+        }
+        
+        .sidebar {
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.2) transparent;
+        }
+        
+        .sidebar::-webkit-scrollbar { width: 5px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .sidebar-logo {
+            max-width: 210px;
+            height: auto;
+            color: white; 
+            font-size: 1.2rem;
+            font-weight: bold;
+            word-break: keep-all;
+        }
+
+
+    </style>
+</head>
+
+<body>
+    <div class="global-clock" id="global-clock">
+        <i class="bi bi-clock-history"></i>
+        <span id="global-time">Carregando...</span>
+    </div>
+
+    <div class="wrapper">
+        <div class="sidebar" id="sidebar">
+            <button id="toggle-sidebar" class="toggle-sidebar-btn" title="Recolher/Expandir Menu">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <h2 class="text-center mt-2 mb-2">
+                <img src="/assets_img/logo2.png" alt="Logo" class="img-fluid sidebar-logo"
+                    onerror="this.src='https://via.placeholder.com/180x60?text=Sistema+Voucher'" />
+            </h2>
+
+            <ul id="menu-navegacao">
+                <li class="menu-category">MENU</li>
+                <li><a href="#inicio" class="menu-item active"><i class="bi bi-house-door"></i> <span>Início</span></a></li>
+                <li><a href="#cadastro" class="menu-item"><i class="bi bi-calendar-plus"></i> <span>Cadastrar Evento</span></a></li>
+                <li><a href="#geracao" class="menu-item"><i class="bi bi-upc-scan"></i> <span>Gerar Vouchers</span></a></li>
+                <li><a href="#controle" class="menu-item"><i class="bi bi-ui-checks"></i> <span>Pendentes vs Gerados</span></a></li>
+                <li><a href="#acesso" class="menu-item"><i class="bi bi-printer"></i> <span>Imprimir Vouchers</span></a></li>
+                
+                <li><a href="#entradas" class="menu-item"><i class="bi bi-card-checklist"></i> <span>Relatório de Entradas</span></a></li>
+                <li><a href="#diario" class="menu-item"><i class="bi bi-calendar-day"></i> <span>Uso Diário</span></a></li>
+                
+                <li><a href="#devolucao" class="menu-item"><i class="bi bi-arrow-return-left"></i> <span>Devolução</span></a></li>
+                <li><a href="#cancelamento" class="menu-item text-warning-hover"><i class="bi bi-x-octagon"></i> <span>Cancelar Vouchers</span></a></li>
+                <li><a href="#aprovar-cancelamento" class="menu-item text-danger-hover menu-admin-only" style="display:none;"><i class="bi bi-check2-square"></i> <span>Aprovar Cancelamentos</span></a></li>
+                <li><a href="/validador.html" target="_blank" class="menu-item"><i class="bi bi-qr-code"></i> <span>Validador</span></a></li>
+
+                <li class="menu-category">GESTÃO</li>
+                <li><a href="#configuracoes" class="menu-item"><i class="bi bi-gear"></i> <span>Configurações & Preços</span></a></li>
+                <li><a href="#usuarios" class="menu-item"><i class="bi bi-people"></i> <span>Usuários</span></a></li>
+                <li><a href="#relatorios" class="menu-item"><i class="bi bi-bar-chart-fill"></i> <span>Dashboard</span></a></li>
+                <li><a href="#exclusao" class="menu-item text-danger-hover"><i class="bi bi-shield-lock"></i> <span>Excluir Evento</span></a></li>
+            </ul>
+
+            <div class="user-dropdown mt-auto">
+                <div class="dropdown">
+                    <a class="dropdown-toggle user-menu-item" href="#" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i>
+                        <span id="user-menu-name" class="ms-2">Usuário</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <div class="dropdown-header"><small>Logado como</small>
+                            <div id="dropdown-user-name" class="fw-bold">Usuário</div>
+                        </div>
+                        </li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li><a class="dropdown-item text-danger" href="#" onclick="fazerLogout()"><i class="bi bi-box-arrow-right me-2"></i>Sair</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="main-content">
+
+            <div id="inicio" class="content-section active">
+                <div class="fiep-root">
+                    <div class="bg-orb orb1"></div>
+                    <div class="bg-orb orb2"></div>
+                    <div class="bg-orb orb3"></div>
+
+                    <div class="fiep-content">
+                        <div class="fiep-top-bar">
+                            <div class="fiep-logo">FIEP <span>·</span> VOUCHERS</div>
+                            <div class="greeting">
+                                <div class="user mt-2">Olá, <strong id="hub-user-name">Usuário</strong> 👋</div>
+                            </div>
+                        </div>
+
+                        <div><h2>Gerencie eventos, vouchers e validações em um único painel.</h2></div>
+
+                        <div class="stats-row mt-4">
+                            <div class="stat-card" onclick="irParaSecao('relatorios')">
+                                <div class="label">Acesso Rápido</div>
+                                <div class="value"><i class="bi bi-bar-chart-fill" style="color: #66d9e8;"></i></div>
+                                <div class="sub"><span class="dot dot-second-color"></span>Ver Relatórios</div>
+                            </div>
+                            <div class="stat-card" onclick="irParaSecao('geracao')">
+                                <div class="label">Acesso Rápido</div>
+                                <div class="value"><i class="bi bi-ticket-perforated" style="color: #91a7ff;"></i></div>
+                                <div class="sub"><span class="dot dot-purple"></span>Gerar Vouchers</div>
+                            </div>
+                            <div class="stat-card" onclick="window.open('/validador.html', '_blank')">
+                                <div class="label">Acesso Rápido</div>
+                                <div class="value"><i class="bi bi-qr-code-scan" style="color: #63e6be;"></i></div>
+                                <div class="sub"><span class="dot dot-green"></span>Abrir Validador</div>
+                            </div>
+                        </div>
+
+                        <div class="section-title">Módulos do sistema</div>
+
+                        <div class="nav-grid">
+                            <div class="nav-card c1" onclick="irParaSecao('cadastro')">
+                                <div class="nav-icon ic1"><i class="bi bi-calendar-plus" aria-hidden="true"></i></div>
+                                <div class="nav-info">
+                                    <div class="nav-name">Cadastrar Evento</div>
+                                    <div class="nav-desc">Criar novo evento com data e tipo</div>
+                                </div>
+                                <div class="nav-arrow"><i class="bi bi-arrow-right-short" aria-hidden="true"></i></div>
+                            </div>
+
+                            <div class="nav-card c2" onclick="irParaSecao('geracao')">
+                                <div class="nav-icon ic2"><i class="bi bi-upc-scan" aria-hidden="true"></i></div>
+                                <div class="nav-info">
+                                    <div class="nav-name">Gerar Vouchers</div>
+                                    <div class="nav-desc">Emitir vouchers por evento</div>
+                                </div>
+                                <div class="nav-arrow"><i class="bi bi-arrow-right-short" aria-hidden="true"></i></div>
+                            </div>
+                            
+                            <div class="nav-card c3" onclick="irParaSecao('controle')">
+                                <div class="nav-icon ic3"><i class="bi bi-ui-checks" aria-hidden="true"></i></div>
+                                <div class="nav-info">
+                                    <div class="nav-name">Pendentes vs Gerados</div>
+                                    <div class="nav-desc">Controle de lotação dos eventos</div>
+                                </div>
+                                <div class="nav-arrow"><i class="bi bi-arrow-right-short" aria-hidden="true"></i></div>
+                            </div>
+
+                            <div class="nav-card c4" onclick="irParaSecao('acesso')">
+                                <div class="nav-icon ic4"><i class="bi bi-printer" aria-hidden="true"></i></div>
+                                <div class="nav-info">
+                                    <div class="nav-name">Imprimir Vouchers</div>
+                                    <div class="nav-desc">Preparar lotes para impressão</div>
+                                </div>
+                                <div class="nav-arrow"><i class="bi bi-arrow-right-short" aria-hidden="true"></i></div>
+                            </div>
+
+                            <div class="nav-card c8" onclick="irParaSecao('entradas')">
+                                <div class="nav-icon ic8" style="background: rgba(13, 202, 240, 0.2); color: #0dcaf0;"><i class="bi bi-card-checklist" aria-hidden="true"></i></div>
+                                <div class="nav-info">
+                                    <div class="nav-name">Relatório de Entradas</div>
+                                    <div class="nav-desc">Ver check-ins e uso em tempo real</div>
+                                </div>
+                                <div class="nav-arrow"><i class="bi bi-arrow-right-short" aria-hidden="true"></i></div>
+                            </div>
+
+                            <div class="nav-card c10" onclick="irParaSecao('diario')">
+                                <div class="nav-icon ic10" style="background: rgba(255, 193, 7, 0.2); color: #ffc107;"><i class="bi bi-calendar-day" aria-hidden="true"></i></div>
+                                <div class="nav-info">
+                                    <div class="nav-name">Uso Diário</div>
+                                    <div class="nav-desc">Check-ins agrupados por data</div>
+                                </div>
+                                <div class="nav-arrow"><i class="bi bi-arrow-right-short" aria-hidden="true"></i></div>
+                            </div>
+
+                            <div class="nav-card c5" onclick="irParaSecao('relatorios')">
+                                <div class="nav-icon ic5"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i></div>
+                                <div class="nav-info">
+                                    <div class="nav-name">Dashboard</div>
+                                    <div class="nav-desc">Visão consolidada por período</div>
+                                </div>
+                                <div class="nav-arrow"><i class="bi bi-arrow-right-short" aria-hidden="true"></i></div>
+                            </div>
+
+                            <div class="nav-card c6" onclick="irParaSecao('devolucao')">
+                                <div class="nav-icon ic6"><i class="bi bi-arrow-return-left" aria-hidden="true"></i></div>
+                                <div class="nav-info">
+                                    <div class="nav-name">Devolução</div>
+                                    <div class="nav-desc">Registrar devoluções de voucher</div>
+                                </div>
+                                <div class="nav-arrow"><i class="bi bi-arrow-right-short" aria-hidden="true"></i></div>
+                            </div>
+                            
+                            <div class="nav-card c7" onclick="irParaSecao('cancelamento')">
+                                <div class="nav-icon ic7" style="background: rgba(220, 53, 69, 0.2); color: #ff6b6b;"><i class="bi bi-x-octagon" aria-hidden="true"></i></div>
+                                <div class="nav-info">
+                                    <div class="nav-name">Cancelar Vouchers</div>
+                                    <div class="nav-desc">Solicitar cancelamento de lotes</div>
+                                </div>
+                                <div class="nav-arrow"><i class="bi bi-arrow-right-short" aria-hidden="true"></i></div>
+                            </div>
+
+                            <div class="nav-card c9 menu-admin-only" onclick="irParaSecao('aprovar-cancelamento')" style="display:none;">
+                                <div class="nav-icon ic9" style="background: rgba(220, 53, 69, 0.2); color: #dc3545;"><i class="bi bi-check2-square" aria-hidden="true"></i></div>
+                                <div class="nav-info">
+                                    <div class="nav-name">Aprovar Cancelamentos</div>
+                                    <div class="nav-desc">Analisar e aprovar solicitações</div>
+                                </div>
+                                <div class="nav-arrow"><i class="bi bi-arrow-right-short" aria-hidden="true"></i></div>
+                            </div>
+                        </div>
+
+                        <div class="bottom-bar mt-4">
+                            <div>
+                                <div class="activity-label">Status do sistema</div>
+                                <div class="activity-val">Tudo operacional</div>
+                            </div>
+                            <div class="pulse">
+                                <div class="pulse-dot"></div>
+                                <span style="font-size:12px;color:rgba(255,255,255,0.4)">Online</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TODAS AS TELAS ORIGINAIS -->
+            <div id="cadastro" class="content-section">
+                <div class="form-section">
+                    <h2 class="titulo-form mb-4">Cadastrar Evento</h2>
+                    <form id="form-evento">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="nomeEvento" class="form-label fw-bold">Nome do Evento</label>
+                                <input type="text" class="form-control" id="nomeEvento" required
+                                    placeholder="Ex: Congresso FIEP" />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="dataEvento" class="form-label fw-bold">Data do Evento</label>
+                                <input type="date" class="form-control" id="dataEvento" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="capacidadeEvento" class="form-label fw-bold">Lotação Máxima</label>
+                                <input type="number" class="form-control" id="capacidadeEvento" min="1" required
+                                    placeholder="Ex: 250" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4 mt-3">
+                            <label class="form-label fw-bold">Tipo de Voucher</label>
+
+                            <div class="tipo-voucher-card">
+                                <h6 class="mb-3 text-muted"><i class="bi bi-door-closed"></i>Tipo de Acesso</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-check tipo-option">
+                                            <input class="form-check-input" type="radio" name="tipoAcesso"
+                                                id="acessoInterno" value="interno" checked
+                                                onclick="atualizarResumo()" />
+                                            <label class="form-check-label" for="acessoInterno"><span
+                                                    class="badge tipo-badge badge-interno me-2">INTERNO</span> <span class="text-muted">Acesso Interno</span></label>
+                                            <small class="text-muted d-block mt-1">Para colaboradores e
+                                                funcionários</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check tipo-option">
+                                            <input class="form-check-input" type="radio" name="tipoAcesso"
+                                                id="acessoExterno" value="externo" onclick="atualizarResumo()" />
+                                            <label class="form-check-label" for="acessoExterno"><span
+                                                    class="badge tipo-badge badge-externo me-2">EXTERNO</span><span class="text-muted">Acesso Externo</span></label>
+                                            <small class="text-muted d-block mt-1">Para convidados e visitantes</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-check tipo-option">
+                                            <input class="form-check-input" type="radio" name="tipoAcesso"
+                                                id="acessoAtrio" value="atrio" onclick="atualizarResumo()" />
+                                            <label class="form-check-label" for="acessoAtrio"><span
+                                                    class="badge tipo-badge bg-info text-light me-2">ÁTRIO</span><span class="text-muted">Espaço Átrio</span></label>
+                                            <small class="text-muted d-block mt-1">Para o grupo Átrio</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tipo-voucher-card">
+                                <h6 class="mb-3 text-muted"><i class="bi bi-cup-straw"></i> Tipo de Bebida</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check tipo-option">
+                                            <input class="form-check-input" type="radio" name="tipoBebida"
+                                                id="bebidaCom" value="com_bebida" checked onclick="atualizarResumo()" />
+                                            <label class="form-check-label" for="bebidaCom"><span
+                                                    class="badge tipo-badge badge-com-bebida me-2">COM BEBIDA</span> <span class="text-muted">Com Bebida</span></label>
+                                            <small class="text-muted d-block mt-1">Inclui refrigerante/suco</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check tipo-option">
+                                            <input class="form-check-input" type="radio" name="tipoBebida"
+                                                id="bebidaSem" value="sem_bebida" onclick="atualizarResumo()" />
+                                            <label class="form-check-label" for="bebidaSem"><span
+                                                    class="badge tipo-badge badge-sem-bebida me-2">SEM BEBIDA</span><span class="text-muted">Sem Bebida</span></label>
+                                            <small class="text-muted d-block mt-1">Apenas refeição</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="resumo-voucher">
+                                <h6 class="mb-2"><i class="bi bi-eye"></i> Resumo do Voucher:</h6>
+                                <div id="resumoVoucher" class="fw-bold">
+                                    <span class="badge bg-light text-dark me-1">INTERNO</span>
+                                    <span class="badge bg-light text-dark me-1">COM BEBIDA</span>
+                                </div>
+                                <small class="opacity-75">Este será o formato impresso nos vouchers</small>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-2"><i class="bi bi-check-lg"></i>
+                            Cadastrar Evento</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TELA DE CONFIGURAÇÕES E PREÇOS DINÂMICOS -->
+            <div id="configuracoes" class="content-section">
+                <div class="form-section" style="max-width: 100%;">
+                    <h2><i class="bi bi-gear"></i> Gestão de Preços e Configurações</h2>
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle"></i> Gerencie os valores unitários cobrados por grupo e tipo de bebida para os relatórios financeiros.
+                    </div>
+
+                    <h4 class="mb-3 text-white"><i class="bi bi-currency-dollar"></i> Preços Atuais</h4>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-dark table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Grupo</th>
+                                    <th>Tipo de Bebida</th>
+                                    <th>Valor (R$)</th>
+                                    <th>Atualizado Por</th>
+                                    <th>Data Atualização</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-precos-body">
+                                <tr><td colspan="6" class="text-center">Carregando configurações de preços...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h4 class="mb-3 text-white mt-5"><i class="bi bi-clock-history"></i> Histórico de Modificações de Preços</h4>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Responsável</th>
+                                    <th>Grupo</th>
+                                    <th>Bebida</th>
+                                    <th>Valor Anterior</th>
+                                    <th>Novo Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-logs-precos">
+                                <tr><td colspan="6" class="text-center">Nenhum histórico encontrado.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="geracao" class="content-section">
+                <div class="form-section">
+                    <h2 class="titulo-form mb-4">Gerar Vouchers</h2>
+                    <form id="form-vouchers">
+                        <div class="mb-3">
+                            <label for="eventoSelect" class="form-label">Escolha o Evento</label>
+                            <select class="form-select" id="eventoSelect" required>
+                                <option value="">Carregando eventos...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantidadeVouchers" class="form-label">Quantidade de Vouchers</label>
+                            <input type="number" class="form-control" id="quantidadeVouchers" min="1" required
+                                placeholder="Ex: 10" />
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2"><i class="bi bi-upc-scan"></i> Gerar
+                            Vouchers</button>
+                    </form>
+                    <div id="status-geracao" class="mt-3"></div>
+                </div>
+            </div>
+            
+            <div id="controle" class="content-section">
+                <div class="form-section" style="max-width: 100%;">
+                    
+                    <h2><i class="bi bi-ui-checks"></i> Controle de Emissões (Pendentes vs Gerados)</h2>
+                    
+                    <div class="alert" style="background-color: rgba(255, 193, 7, 0.1); border-color: #ffc107; color: #ffc107;">
+                        <i class="bi bi-info-circle"></i> Acompanhe a capacidade dos eventos e o saldo exato de vouchers que ainda estão pendentes (disponíveis para serem gerados).
+                    </div>
+                    
+                    <div class="table-responsive mt-4">
+                        <table class="table table-dark table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Evento</th>
+                                    <th>Data</th>
+                                    <th class="text-center">Lotação Máxima</th>
+                                    <th class="text-center">Já Gerados</th>
+                                    <th class="text-center">Pendentes (Restantes)</th>
+                                    <th>Status da Lotação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-controle-body">
+                                <tr><td colspan="6" class="text-center">Carregando dados de controle...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="acesso" class="content-section">
+                <div class="form-section">
+                    <h2 class="titulo-form mb-4">Acessar e Imprimir Vouchers</h2>
+                    <form id="form-acessar-vouchers">
+                        <div class="mb-3">
+                            <label for="eventoAcessarSelect" class="form-label">Escolha o Evento</label>
+                            <select class="form-select" id="eventoAcessarSelect" required>
+                                <option value="">Carregando eventos...</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tamanhoImpressao" class="form-label">Tamanho da Impressão</label>
+                            <select class="form-select" id="tamanhoImpressao" required>
+                                <option value="58">58mm (Pequeno)</option>
+                                <option value="80" selected>80mm (Padrão)</option>
+                            </select>
+                        </div>
+
+                        <!-- FILTROS DE IMPRESSÃO -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="filtroStatusImpressao" class="form-label">Status do Voucher</label>
+                                <select id="filtroStatusImpressao" class="form-select">
+                                    <option value="todos">Todos (Lote Completo)</option>
+                                    <option value="ativo">Somente Válidos (Não usados)</option>
+                                    <option value="usado">Somente Usados</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="intervaloInicio" class="form-label">A partir do ID (Nº)</label>
+                                <input type="number" id="intervaloInicio" class="form-control" placeholder="Ex: 31" min="1">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="intervaloFim" class="form-label">Até o ID (Nº)</label>
+                                <input type="number" id="intervaloFim" class="form-control" placeholder="Ex: 50" min="1">
+                            </div>
+                        </div>
+                        <div class="form-text text-light">
+                            <i class="bi bi-info-circle"></i> Deixe o intervalo em branco para imprimir todos os vouchers da categoria selecionada.
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-2"><i class="bi bi-printer"></i> Acessar e Imprimir</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TELA DE ENTRADAS -->
+            <div id="entradas" class="content-section">
+                <div class="form-section" style="max-width: 100%;">
+                    <h2><i class="bi bi-card-checklist"></i> Relatório de Entradas (Check-in)</h2>
+                    <div class="alert alert-info" style="background-color: rgba(13, 202, 240, 0.1); border-color: #0dcaf0; color: #0dcaf0;">
+                        <i class="bi bi-info-circle"></i> Acompanhe em tempo real os horários e o status das entradas de cada evento.
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-4 mb-2">
+                            <label for="eventoEntradasSelect" class="form-label fw-bold">Selecione o Evento</label>
+                            <select class="form-select" id="eventoEntradasSelect" onchange="window.voucherSystem.carregarRelatorioEntradas()">
+                                <option value="">Carregando eventos...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="filtroStatusEntradas" class="form-label fw-bold">Filtrar Status</label>
+                            <select class="form-select" id="filtroStatusEntradas" onchange="window.voucherSystem.carregarRelatorioEntradas()">
+                                <option value="todos">Todos</option>
+                                <option value="usado">Somente Validados</option>
+                                <option value="ativo">Aguardando Uso</option>
+                                <option value="expirado">Expirados / Devolvidos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label for="ordemEntradas" class="form-label fw-bold">Ordenar por</label>
+                            <select class="form-select" id="ordemEntradas" onchange="window.voucherSystem.carregarRelatorioEntradas()">
+                                <option value="recentes">Mais Recentes no topo</option>
+                                <option value="codigo">Numeração (Crescente A-Z)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <button class="btn btn-info w-100 fw-bold text-dark" id="btn-buscar-entradas" onclick="window.voucherSystem.carregarRelatorioEntradas()">
+                                <i class="bi bi-arrow-clockwise"></i> Atualizar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Código do Voucher</th>
+                                    <th>Tipo de Acesso</th>
+                                    <th>Bebida</th>
+                                    <th>Status</th>
+                                    <th>Data Validação</th>
+                                    <th>Hora Validação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-entradas-body">
+                                <tr><td colspan="6" class="text-center">Selecione um evento para carregar o histórico de entradas.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA DE USO DIÁRIO -->
+            <div id="diario" class="content-section">
+                <div class="form-section" style="max-width: 100%;">
+                    <h2><i class="bi bi-calendar-day"></i> Uso Diário (Visão por Data)</h2>
+                    <div class="alert alert-info" style="background-color: rgba(13, 202, 240, 0.1); border-color: #0dcaf0; color: #0dcaf0;">
+                        <i class="bi bi-info-circle"></i> Veja o fluxo de pessoas que entraram em um dia específico, agrupados por evento.
+                    </div>
+                    
+                    <div class="row mb-4 align-items-end">
+                        <div class="col-md-4 mb-2">
+                            <label for="dataFiltroDiario" class="form-label fw-bold">Selecione o Dia</label>
+                            <input type="date" id="dataFiltroDiario" class="form-control">
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <button class="btn btn-info w-100 fw-bold text-dark" onclick="window.voucherSystem.carregarRelatorioDiario()">
+                                <i class="bi bi-search"></i> Buscar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="resumo-diario-cards" class="row mb-4"></div>
+
+                    <div class="table-responsive">
+                        <table class="table table-dark text-light table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Horário</th>
+                                    <th>Código do Voucher</th>
+                                    <th>Evento</th>
+                                    <th>Tipo de Acesso</th>
+                                    <th>Bebida</th>
+                                    <th>Evento Criado Por</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-diario-body">
+                                <tr><td colspan="6" class="text-center">Selecione uma data para carregar o histórico.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA DE DEVOLUÇÃO -->
+            <div id="devolucao" class="content-section">
+                <div class="form-section">
+                    <h2 class="titulo-form mb-4"><i class="bi bi-arrow-return-left"></i> Devolução de Vouchers</h2>
+                    <div class="alert alert-info"><i class="bi bi-info-circle"></i> <strong>Informação:</strong> A
+                        devolução será calculada automaticamente em 10% do total de vouchers não utilizados.</div>
+                    <form id="form-devolucao">
+                        <div class="mb-3">
+                            <label for="eventoDevolucaoSelect" class="form-label">Evento para Devolução</label>
+                            <select class="form-select" id="eventoDevolucaoSelect" required>
+                                <option value="">Selecione um evento...</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="quantidadeDevolucao" class="form-label">Quantidade para Devolução</label>
+                            <input type="number" class="form-control" id="quantidadeDevolucao" min="1" required
+                                placeholder="Informe a quantidade" disabled />
+                            <div class="form-text text-white">Quantidade máxima permitida: <span id="max-devolucao"
+                                    class="fw-bold">0</span> vouchers</div>
+                        </div>
+                        <div class="mb-3"><label for="dataDevolucao" class="form-label">Data da Devolução</label><input
+                                type="date" class="form-control" id="dataDevolucao" required /></div>
+                        <div class="mb-3"><label for="responsavelDevolucao" class="form-label">Responsável pela
+                                Devolução</label><input type="text" class="form-control" id="responsavelDevolucao"
+                                required placeholder="Nome do responsável" /></div>
+                        <div class="mb-4"><label for="observacaoDevolucao"
+                                class="form-label">Observações</label><textarea class="form-control"
+                                id="observacaoDevolucao" rows="3"
+                                placeholder="Informações adicionais sobre a devolução..."></textarea></div>
+                        <div id="resumo-devolucao" class="card mb-4" style="display:none">
+                            <div class="card-header bg-success text-white"><i class="bi bi-check-circle"></i> Resumo da
+                                Devolução</div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6"><strong>Evento:</strong> <span id="resumo-evento">-</span>
+                                    </div>
+                                    <div class="col-md-6"><strong>Quantidade:</strong> <span
+                                            id="resumo-quantidade">0</span> vouchers</div>
+                                    <div class="col-md-6"><strong>Data:</strong> <span id="resumo-data">-</span></div>
+                                    <div class="col-md-6"><strong>Responsável:</strong> <span
+                                            id="resumo-responsavel">-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100 py-2" id="btn-confirmar-devolucao"
+                            disabled><i class="bi bi-check-lg"></i> Confirmar Devolução</button>
+                    </form>
+                    <div class="mt-5">
+                        <h4 class="text-white mb-3"><i class="bi bi-clock-history"></i> Histórico de Devoluções</h4>
+                        <div class="table-responsive">
+                            <table class="table table-dark table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Evento</th>
+                                        <th>Quantidade</th>
+                                        <th>Responsável</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historico-devolucoes">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-white">Nenhuma devolução registrada</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA DE CANCELAMENTO DE VOUCHERS -->
+            <div id="cancelamento" class="content-section">
+                <div class="form-section" style="max-width: 100%;">
+                    <h2><i class="bi bi-x-octagon" style="color: #ffc107;"></i> Cancelamento de Vouchers</h2>
+                    <div class="alert alert-warning" style="background-color: rgba(255, 193, 7, 0.1); border-color: #ffc107; color: #ffc107;">
+                        <i class="bi bi-exclamation-triangle-fill"></i> Selecione os vouchers ativos que deseja solicitar o cancelamento. Esta solicitação será enviada para aprovação do Administrador.
+                    </div>
+                    
+                    <div class="row mb-4 mt-4">
+                        <div class="col-md-6 mb-2">
+                            <label for="eventoCancelamentoSelect" class="form-label fw-bold">Selecione o Evento</label>
+                            <select class="form-select border-warning" id="eventoCancelamentoSelect">
+                                <option value="">Carregando eventos...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="area-tabela-cancelamento" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-end mb-2 mt-4">
+                            <h5 class="text-white m-0">Vouchers Disponíveis para Solicitar Cancelamento</h5>
+                            <button class="btn btn-sm btn-outline-light" id="btn-selecionar-todos-cancelamento">Selecionar Todos</button>
+                        </div>
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-dark table-striped align-middle table-hover">
+                                <thead style="position: sticky; top: 0; z-index: 1;">
+                                    <tr>
+                                        <th style="width: 50px;" class="text-center">Ação</th>
+                                        <th>Código do Voucher</th>
+                                        <th>Acesso</th>
+                                        <th>Bebida</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-cancelamento-body">
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="mt-4 p-3 rounded" style="background-color: rgba(255, 193, 7, 0.05); border: 1px dashed #ffc107;">
+                            <button id="btn-confirmar-cancelamento" class="btn btn-warning w-100 py-3 fw-bold text-dark" disabled>
+                                <i class="bi bi-trash3-fill"></i> SOLICITAR CANCELAMENTO AO ADMIN (<span id="count-cancelamento">0</span> selecionados)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOVA TELA DE APROVAÇÃO DE CANCELAMENTOS (ADMIN) -->
+            <div id="aprovar-cancelamento" class="content-section">
+                <div class="form-section" style="max-width: 100%;">
+                    <h2><i class="bi bi-check2-square" style="color: #dc3545;"></i> Aprovar Cancelamento de Vouchers</h2>
+                    <div class="alert alert-danger" style="background-color: rgba(220, 53, 69, 0.1); border-color: #dc3545; color: #dc3545;">
+                        <i class="bi bi-shield-exclamation"></i> Gerencie abaixo os vouchers que estão aguardando aprovação de cancelamento enviados pela equipe operacional.
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-end mb-3 mt-4">
+                        <h5 class="text-white m-0">Solicitações Pendentes</h5>
+                        <button class="btn btn-sm btn-outline-danger" onclick="window.voucherSystem.carregarPendentesCancelamento()">
+                            <i class="bi bi-arrow-clockwise"></i> Atualizar Lista
+                        </button>
+                    </div>
+
+                    <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                        <table class="table table-dark table-striped align-middle table-hover">
+                            <thead style="position: sticky; top: 0; z-index: 1;">
+                                <tr>
+                                    <th style="width: 50px;" class="text-center">
+                                        <input class="form-check-input" type="checkbox" id="chk-todos-pendentes" onchange="window.voucherSystem.toggleSelecionarTodosPendentes(this)">
+                                    </th>
+                                    <th>Código</th>
+                                    <th>Evento</th>
+                                    <th>Solicitante</th>
+                                    <th>Motivo / Justificativa</th>
+                                    <th>Data Solicitação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-pendentes-cancelamento-body">
+                                <tr><td colspan="6" class="text-center text-muted">Carregando solicitações pendentes...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4 p-3 rounded" style="background-color: rgba(220, 53, 69, 0.05); border: 1px dashed #dc3545;">
+                        <button id="btn-aprovar-cancelamento-lote" class="btn btn-danger w-100 py-3 fw-bold" disabled onclick="window.voucherSystem.aprovarCancelamentoSelecionados()">
+                            <i class="bi bi-check-circle-fill"></i> APROVAR CANCELAMENTO DEFINITIVO (<span id="count-pendentes">0</span> selecionados)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA DE EXCLUSÃO -->
+            <div id="exclusao" class="content-section">
+                <div class="form-section border-danger-custom" style="background-color: #2b1f2e; max-width: 900px;">
+                    <h2 class="titulo-form mb-4 text-danger"><i class="bi bi-shield-lock"></i> Solicitar Exclusão de Evento</h2>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i> <strong>Atenção:</strong> A exclusão de um evento passará por aprovação da gerência. Informe o motivo detalhado abaixo.
+                    </div>
+                    
+                    <form id="form-excluir">
+                        <div class="row">
+                            <div class="col-md-12 mb-3 mt-2">
+                                <label for="eventoExcluirSelect" class="form-label text-white">Selecione o Evento</label>
+                                <select class="form-select" style="border: 1px solid #dc3545;" id="eventoExcluirSelect" required>
+                                    <option value="">Carregando eventos...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-4">
+                                <label for="motivoExclusao" class="form-label text-white">Motivo da Exclusão (Justificativa)</label>
+                                <textarea class="form-control" id="motivoExclusao" rows="3" required placeholder="Explique por que este evento e seus vouchers devem ser excluídos do sistema..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100 py-3 fw-bold"><i class="bi bi-send-fill"></i> ENVIAR SOLICITAÇÃO DE EXCLUSÃO</button>
+                    </form>
+
+                    <div class="mt-5 pt-4 border-top border-secondary">
+                        <h4 class="text-white mb-3"><i class="bi bi-clock-history"></i> Histórico e Aprovações</h4>
+                       <div class="table-responsive">
+                            <table class="table table-dark table-striped align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Solicitado Em</th>
+                                        <th>Evento</th>
+                                        <th>Solicitante</th>
+                                        <th>Motivo</th>
+                                        <th>Status / Aprovador</th>
+                                        <th class="text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historico-exclusoes">
+                                    <tr><td colspan="6" class="text-center">Carregando solicitações...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TELA DE USUÁRIOS -->
+            <div id="usuarios" class="content-section">
+                <div class="form-section" style="max-width: 100%;">
+                    <h2><i class="bi bi-people-fill"></i> Gestão de Usuários</h2>
+                    <div class="alert alert-info" style="background-color: rgba(13, 202, 240, 0.1); border-color: #0dcaf0; color: #0dcaf0;">
+                        <i class="bi bi-shield-lock"></i> Acesso restrito. Adicione membros da equipe e defina seus níveis de permissão no sistema.
+                    </div>
+                    
+                    <div class="card bg-dark border-secondary mb-4 mt-4">
+                        <div class="card-body">
+                            <form id="form-usuario" class="row g-3 align-items-end">
+                                <div class="col-md-4">
+                                    <label for="nomeUsuario" class="form-label text-white">Nome Completo</label>
+                                    <input type="text" class="form-control" id="nomeUsuario" required placeholder="Ex: João Silva">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="emailUsuario" class="form-label text-white">E-mail / Identificador Microsoft</label>
+                                    <input type="text" class="form-control" id="emailUsuario" required placeholder="Ex: email@... ou Nome Completo">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="nivelUsuario" class="form-label text-white">Nível de Acesso</label>
+                                    <select class="form-select" id="nivelUsuario" required>
+                                        <option value="visitante">Visitante</option>
+                                        <option value="operacional">Operacional</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="master">Master</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-info w-100 fw-bold text-dark"><i class="bi bi-person-plus"></i> Adicionar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>E-mail / Identificador</th>
+                                    <th>Nível de Acesso</th>
+                                    <th>Data de Cadastro</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-usuarios-body">
+                                <tr><td colspan="5" class="text-center">Carregando usuários...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="relatorios" class="content-section">
+                <div class="dashboard-container">
+                    <div class="dashboard-header">
+                        <div class="dh-left">
+                            <div class="dh-eyebrow">Sistema de Vouchers</div>
+                            <h1 class="dashboard-title">Dashboard de Relatórios</h1>
+                            <div class="dh-subtitle" id="dh-subtitle-filtro">Exibindo todos os eventos</div>
+                        </div>
+                        <div class="dashboard-controls">
+                            <button class="btn-dash-refresh btn-atualizar"><i class="bi bi-arrow-clockwise"></i><span>Atualizar</span></button>
+                            <button class="btn-dash-export btn-dashboard"><i class="bi bi-download"></i><span>Exportar CSV</span></button>
+                        </div>
+                    </div>
+
+                    <div class="kpi-grid-v2">
+                        <div class="kpi-card-v2 kpi-eventos">
+                            <div class="kpi-icon-wrap"><i class="bi bi-calendar-event-fill"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Total de Eventos</div>
+                                <div class="kpi-value" id="kpi-total-eventos">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card-v2 kpi-ativos">
+                            <div class="kpi-icon-wrap"><i class="bi bi-lightning-charge-fill"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Vouchers Ativos</div>
+                                <div class="kpi-value" id="kpi-ativos">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card-v2 kpi-usados">
+                            <div class="kpi-icon-wrap"><i class="bi bi-check2-circle"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Vouchers Usados</div>
+                                <div class="kpi-value" id="kpi-usados">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card-v2 kpi-taxa">
+                            <div class="kpi-icon-wrap"><i class="bi bi-percent"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Taxa de Uso</div>
+                                <div class="kpi-value" id="kpi-taxa-uso">0%</div>
+                            </div>
+                            <div class="kpi-radial" id="kpi-radial-taxa"></div>
+                        </div>
+                        <div class="kpi-card-v2 kpi-devolvidos">
+                            <div class="kpi-icon-wrap"><i class="bi bi-arrow-return-left"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Devolvidos</div>
+                                <div class="kpi-value" id="kpi-devolvidos">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card-v2 kpi-expirados">
+                            <div class="kpi-icon-wrap"><i class="bi bi-hourglass-bottom"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Expirados</div>
+                                <div class="kpi-value" id="kpi-expirados">0</div>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card-v2">
+                            <div class="kpi-icon-wrap" style="background: rgba(13, 202, 240, 0.1); color: #0dcaf0;"><i class="bi bi-cash-stack"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Faturamento Interno</div>
+                                <div class="kpi-value-sm" id="kpi-faturado-interno">R$ 0,00</div>
+                                <div style="font-size: 0.75rem; color: #888; margin-top: 3px;">Gerado: <span id="kpi-gerado-interno">R$ 0,00</span></div>
+                            </div>
+                        </div>
+                        <div class="kpi-card-v2">
+                            <div class="kpi-icon-wrap" style="background: rgba(255, 193, 7, 0.1); color: #ffc107;"><i class="bi bi-cash-stack"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Faturamento Externo</div>
+                                <div class="kpi-value-sm" id="kpi-faturado-externo">R$ 0,00</div>
+                                <div style="font-size: 0.75rem; color: #888; margin-top: 3px;">Gerado: <span id="kpi-gerado-externo">R$ 0,00</span></div>
+                            </div>
+                        </div>
+                        <div class="kpi-card-v2">
+                            <div class="kpi-icon-wrap" style="background: rgba(40, 167, 69, 0.1); color: #28a745;"><i class="bi bi-currency-dollar"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Faturamento Total</div>
+                                <div class="kpi-value-sm" id="kpi-faturado-total">R$ 0,00</div>
+                                <div style="font-size: 0.75rem; color: #888; margin-top: 3px;">Gerado: <span id="kpi-gerado-total">R$ 0,00</span></div>
+                            </div>
+                        </div>
+
+                        <div class="kpi-card-v2 kpi-ociosidade">
+                            <div class="kpi-icon-wrap"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label">Taxa Ociosidade</div>
+                                <div class="kpi-value" id="kpi-ociosidade">0%</div>
+                            </div>
+                        </div>
+                    </div> 
+
+                    <div class="mt-5 mb-3">
+                        <h4 class="text-danger border-bottom border-danger pb-2 fw-bold" style="font-family: 'Syne', sans-serif;">
+                            <i class="bi bi-shield-x"></i> Impacto de Cancelamentos
+                        </h4>
+                    </div>
+
+                    <div class="kpi-grid-v2">
+                        <div class="kpi-card-v2" style="border: 1px solid #dc3545; background: rgba(220, 53, 69, 0.05);">
+                            <div class="kpi-icon-wrap" style="background: rgba(220, 53, 69, 0.2); color: #dc3545;"><i class="bi bi-calendar-x"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label text-danger">Eventos Cancelados</div>
+                                <div class="kpi-value" id="kpi-eventos-cancelados">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card-v2" style="border: 1px solid #dc3545; background: rgba(220, 53, 69, 0.05);">
+                            <div class="kpi-icon-wrap" style="background: rgba(220, 53, 69, 0.2); color: #dc3545;"><i class="bi bi-ticket-detailed"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label text-danger">Vouchers Inutilizados</div>
+                                <div class="kpi-value" id="kpi-vouchers-cancelados">0</div>
+                            </div>
+                        </div>
+                        <div class="kpi-card-v2" style="border: 1px solid #dc3545; background: rgba(220, 53, 69, 0.05);">
+                            <div class="kpi-icon-wrap" style="background: rgba(220, 53, 69, 0.2); color: #dc3545;"><i class="bi bi-cash-stack"></i></div>
+                            <div class="kpi-body">
+                                <div class="kpi-label text-danger">Faturamento Perdido</div>
+                                <div class="kpi-value-sm text-danger" id="kpi-faturamento-perdido">R$ 0,00</div>
+                                <div style="font-size: 0.75rem; color: #888; margin-top: 3px;">Prejuízo Gerado</div>
+                            </div>
+                        </div>
+                    </div> 
+
+                    <div class="filter-strip mt-4">
+                        <div class="filter-strip-label"><i class="bi bi-funnel-fill"></i> Filtrar por</div>
+                        <div class="quick-filters pill-filters">
+                            <button class="filter-btn active" data-filtro="todos"><i class="bi bi-grid-fill"></i> Todos</button>
+                            <button class="filter-btn" data-filtro="ativos"><i class="bi bi-lightning-charge-fill"></i> Ativos</button>
+                            <button class="filter-btn" data-filtro="concluidos"><i class="bi bi-check2-all"></i> Concluídos</button>
+                            <button class="filter-btn" data-filtro="este-mes"><i class="bi bi-calendar3"></i> Este Mês</button>
+                            <button class="filter-btn" data-filtro="alta-performance"><i class="bi bi-graph-up-arrow"></i> Alta Performance</button>
+                        </div>
+                    </div>
+
+                    <div class="charts-row">
+                        <div class="chart-panel chart-panel-donut">
+                            <div class="chart-panel-header">
+                                <span class="chart-panel-title"><i class="bi bi-pie-chart-fill"></i> Proporção Geral</span>
+                                <span class="chart-panel-subtitle" id="chart-donut-total">Total: 0 vouchers</span>
+                            </div>
+                            <div id="chart-donut"></div>
+                        </div>
+                        <div class="chart-panel chart-panel-bars">
+                            <div class="chart-panel-header">
+                                <span class="chart-panel-title"><i class="bi bi-bar-chart-fill"></i> Volume por Evento</span>
+                                <span class="chart-panel-subtitle">Comparativo de vouchers</span>
+                            </div>
+                            <div id="chart-bars"></div>
+                        </div>
+                    </div>
+
+                    <div class="insights-bar" id="insights-bar"></div>
+
+                    <div class="events-table-container mt-4">
+                        <div class="table-header">
+                            <h3 class="table-title"><i class="bi bi-table"></i> Eventos Cadastrados</h3>
+                            <div class="table-controls">
+                                <button class="btn btn-outline-primary btn-sm btn-atualizar"><i class="bi bi-arrow-clockwise"></i> Atualizar</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="events-table">
+                                <thead>
+                                    <tr>
+                                        <th data-sort="id">ID</th>
+                                        <th data-sort="evento">Evento</th>
+                                        <th data-sort="data">Data</th>
+                                        <th data-sort="total">Total</th>
+                                        <th data-sort="ativos">Ativos</th>
+                                        <th data-sort="usados">Usados</th>
+                                        <th data-sort="devolvidos">Devolvidos</th>
+                                        <th data-sort="cancelados">Cancelados</th>
+                                        <th data-sort="expirados">Expirados</th>
+                                        <th data-sort="uso">% Uso</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="events-table-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="table-footer-bar" id="table-footer-bar"><span id="table-info-count">0 eventos encontrados</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/filters.js"></script>
+
+    <script>
+        function irParaSecao(id) {
+            const link = document.querySelector(`.menu-item[href="#${id}"]`);
+            if (link) link.click();
+        }
+
+        document.getElementById('toggle-sidebar').addEventListener('click', function () {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+            document.getElementById('main-content').classList.toggle('expanded');
+        });
+
+        function updateGlobalClock() {
+            const clockEl = document.getElementById('global-time');
+            if (clockEl) {
+                const now = new Date();
+                const opts = { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+                clockEl.textContent = now.toLocaleDateString('pt-BR', opts).replace(',', ' -');
+            }
+        }
+        updateGlobalClock();
+        setInterval(updateGlobalClock, 1000);
+
+        function atualizarResumo() {
+            const tipoAcesso = document.querySelector('input[name="tipoAcesso"]:checked')?.value || 'interno';
+            const tipoBebida = document.querySelector('input[name="tipoBebida"]:checked')?.value || 'com_bebida';
+            const resumo = document.getElementById("resumoVoucher");
+            if (resumo) {
+                let txtAcesso = tipoAcesso === 'interno' ? 'INTERNO' : (tipoAcesso === 'externo' ? 'EXTERNO' : 'ÁTRIO');
+                resumo.innerHTML = `<span class="badge bg-light text-dark me-1">${txtAcesso}</span><span class="badge bg-light text-dark me-1">${tipoBebida === 'com_bebida' ? 'COM BEBIDA' : 'SEM BEBIDA'}</span>`;
+            }
+        }
+
+        function fazerLogout() {
+            if (confirm("Tem certeza que deseja sair do sistema?")) {
+                window.location.href = "/.auth/logout?post_logout_redirect_uri=/login.html";
+            }
+        }
+
+        let timeoutSessao;
+        const TEMPO_LIMITE_MS = 30 * 60 * 1000; 
+
+        function iniciarContadorInatividade() {
+            resetarTimer();
+            window.addEventListener('mousemove', resetarTimer);
+            window.addEventListener('click', resetarTimer);
+            window.addEventListener('keypress', resetarTimer);
+            window.addEventListener('scroll', resetarTimer);
+        }
+
+        function resetarTimer() {
+            clearTimeout(timeoutSessao);
+            timeoutSessao = setTimeout(() => {
+                alert("Sua sessão expirou por inatividade.");
+                window.location.href = "/.auth/logout?post_logout_redirect_uri=/login.html";
+            }, TEMPO_LIMITE_MS);
+        }
+
+        async function carregarPerfilMicrosoft() {
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+            if (isLocal) {
+                console.warn("⚠️ MODO LOCAL ATIVADO: Ignorando login da Microsoft e simulando usuário.");
+                const userNameSpans = [
+                    document.getElementById("user-menu-name"),
+                    document.getElementById("dropdown-user-name"),
+                    document.getElementById("hub-user-name")
+                ];
+                userNameSpans.forEach(el => { if (el) el.textContent = "Klaiver (Modo Dev)"; });
+                
+                await aplicarRegrasDeHierarquia("master"); 
+                return; 
+            }
+
+            try {
+                const response = await fetch("/.auth/me");
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data && data.length > 0) {
+                        const claims = data[0].user_claims;
+                        const nomeCompleto = claims.find(c => c.typ.includes("name"))?.val;
+                        
+                        if (nomeCompleto) {
+                            const primeiroNome = nomeCompleto.split(' ')[0];
+                            const userNameSpans = [
+                                document.getElementById("user-menu-name"),
+                                document.getElementById("dropdown-user-name"),
+                                document.getElementById("hub-user-name")
+                            ];
+                            userNameSpans.forEach(el => { if (el) el.textContent = primeiroNome; });
+                        }
+                        
+                        await aplicarRegrasDeHierarquia(null); 
+                        return; 
+                    }
+                }
+                window.location.replace("/login.html");
+                
+            } catch (error) {
+                window.location.replace("/login.html");
+            }
+        }
+
+        async function aplicarRegrasDeHierarquia(nivelForcadoLocal) {
+            try {
+                let nivel = "visitante";
+
+                if (nivelForcadoLocal) {
+                    nivel = nivelForcadoLocal.toLowerCase();
+                } else {
+                    const response = await fetch('/auth/me'); 
+                    const usuario = await response.json();
+                    nivel = (usuario.nivel_acesso || "visitante").toLowerCase();
+                }
+
+                console.log(`🛡️ Aplicando regras visuais para o nível: [${nivel.toUpperCase()}]`);
+                
+                const permissoes = {
+                    "master": ["all"], 
+                    "admin": ["inicio", "cadastro", "geracao", "controle", "acesso", "entradas", "diario", "devolucao", "cancelamento", "aprovar-cancelamento", "configuracoes", "relatorios", "exclusao"], 
+                    "operacional": ["inicio", "cadastro", "geracao", "controle", "acesso", "entradas", "diario", "devolucao", "cancelamento", "configuracoes", "relatorios", "exclusao"], 
+                    "visitante": ["inicio", "relatorios", "diario"] 
+                };
+
+                const telasPermitidas = permissoes[nivel] || permissoes["visitante"];
+
+                document.querySelectorAll(".menu-item, .nav-card").forEach(el => {
+                    if (el.getAttribute("href") && el.getAttribute("href").includes("validador")) return;
+                    
+                    const href = el.getAttribute("href") || "";
+                    const secaoId = href.replace("#", ""); 
+                    const onclickStr = el.getAttribute("onclick") || "";
+                    
+                    let deveMostrar = false;
+                    
+                    if (telasPermitidas.includes("all")) {
+                        deveMostrar = true;
+                    } else if (secaoId && telasPermitidas.includes(secaoId)) {
+                        deveMostrar = true;
+                    } else if (onclickStr) {
+                        telasPermitidas.forEach(p => {
+                            if (onclickStr.includes(p)) deveMostrar = true;
+                        });
+                    }
+
+                    if (!deveMostrar) {
+                        el.style.display = "none";
+                    } else {
+                        el.style.display = ""; 
+                    }
+                });
+
+                // Controla elementos exclusivos de admin na sidebar ou grid inicial
+                document.querySelectorAll(".menu-admin-only").forEach(el => {
+                    if (nivel === 'master' || nivel === 'admin') {
+                        el.style.display = "";
+                    } else {
+                        el.style.display = "none";
+                    }
+                });
+
+                const hashAtual = window.location.hash.replace("#", "") || "inicio";
+                if (!telasPermitidas.includes("all") && !telasPermitidas.includes(hashAtual)) {
+                    irParaSecao("inicio");
+                }
+
+            } catch (e) {
+                console.warn("Erro ao definir hierarquia. Assumindo modo de segurança (Visitante).", e);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            atualizarResumo();
+            if (typeof initFilters === "function") { initFilters(); }
+            carregarPerfilMicrosoft();
+            iniciarContadorInatividade();
+        });
+    </script>
+</body>
+</html>

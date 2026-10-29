@@ -1,0 +1,14 @@
+/* Painel da gestão */
+.adm main{max-width:1080px;padding-bottom:48px}
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}.kp .card b{display:block;font-size:32px}.kp .card{padding:16px}
+.tabs{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}.tabs button{min-height:44px;font-size:16px}.tabs .on{background:var(--pri);color:var(--onp);border-color:var(--pri)}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:16px}th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--bd);white-space:nowrap}th{color:var(--tx2);font-weight:600}
+.bar{display:flex;align-items:center;gap:12px;margin:8px 0;font-size:16px}.bar i{display:block;height:14px;border-radius:7px;background:var(--pri);min-width:4px}.bar span:first-child{width:170px;flex:none}
+.qg{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}.qg .card{text-align:center;padding:12px}.qg img{width:100%;max-width:200px}.qg a{font-size:14px;color:var(--pri)}
+.warn{background:#FFF7ED;border:1px solid #FDBA74;color:#9A3412;border-radius:10px;padding:12px 16px;font-size:16px}
+@media print{.noprint{display:none!important}body{background:#fff;color:#000}.qg{grid-template-columns:repeat(3,1fr)}.qg .card{break-inside:avoid;border:1px solid #000;box-shadow:none}.qg h3{font-size:18px;margin:4px 0}}
+.phd{display:none}.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:16px}
+.filters select,.filters input{min-height:48px;font-size:16px}.pager{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px}
+.ph img{cursor:zoom-in}
+@page{size:A4;margin:12mm}
+@media print{.phd{display:block;margin-bottom:12px}.pr1 .rel-list{display:none}.qg{gap:8mm}}

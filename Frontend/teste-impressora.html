@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Teste Impressora FIEP</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background: #f5f5f5;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        color: #2c3e50;
+        text-align: center;
+      }
+      .btn {
+        background: #3498db;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        margin: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .btn:hover {
+        background: #2980b9;
+      }
+      .btn-success {
+        background: #27ae60;
+      }
+      .btn-success:hover {
+        background: #219a52;
+      }
+      #resultado {
+        margin-top: 20px;
+        padding: 15px;
+        border-radius: 5px;
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        min-height: 100px;
+      }
+      .status-online {
+        color: #27ae60;
+        font-weight: bold;
+      }
+      .status-offline {
+        color: #e74c3c;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>🧪 Teste de Impressora FIEP</h2>
+
+      <div style="text-align: center; margin: 20px 0">
+        <button class="btn" onclick="verificarStatus()">📊 Ver Status</button>
+        <button class="btn" onclick="testarImpressao()">🖨️ Teste Rápido</button>
+        <button class="btn btn-success" onclick="imprimirVoucherTeste()">
+          🎫 Voucher Teste
+        </button>
+      </div>
+
+      <div
+        id="status"
+        style="
+          text-align: center;
+          margin: 15px 0;
+          padding: 10px;
+          background: #ecf0f1;
+          border-radius: 5px;
+        "
+      >
+        Carregando status...
+      </div>
+
+      <div id="resultado"></div>
+    </div>
+
+    <script>
+      async function verificarStatus() {
+        try {
+          const response = await fetch("http://localhost:3000/health");
+          const data = await response.json();
+
+          document.getElementById("status").innerHTML =
+            `Status: <span class="status-online">${data.status}</span> | ` +
+            `Impressora: <span class="${
+              data.impressora === "conectada"
+                ? "status-online"
+                : "status-offline"
+            }">${data.impressora}</span> | ` +
+            `Porta: ${data.impressoraAtual || "N/A"}`;
+
+          document.getElementById(
+            "resultado"
+          ).innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        } catch (error) {
+          document.getElementById(
+            "status"
+          ).innerHTML = `<span class="status-offline">Serviço offline</span>`;
+          document.getElementById("resultado").innerHTML =
+            "❌ Erro ao conectar com o serviço: " + error.message;
+        }
+      }
+
+      async function testarImpressao() {
+        try {
+          document.getElementById("resultado").innerHTML =
+            "⏳ Enviando comando de teste...";
+
+          const response = await fetch(
+            "http://localhost:3000/imprimir-voucher",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                voucher: {
+                  codigo: "TESTE-001",
+                  nome_evento: "TESTE DE IMPRESSORA",
+                  data_formatada: new Date().toLocaleDateString("pt-BR"),
+                },
+                cortar: true,
+              }),
+            }
+          );
+
+          const resultado = await response.json();
+
+          if (resultado.success) {
+            document.getElementById("resultado").innerHTML =
+              "✅ <strong>Teste impresso com sucesso!</strong><br>" +
+              "Verifique se a impressora:<br>" +
+              "✓ Imprimiu o texto<br>" +
+              "✓ Cortou o papel automaticamente<br><br>" +
+              `<small>Resultado: ${JSON.stringify(resultado, null, 2)}</small>`;
+          } else {
+            document.getElementById("resultado").innerHTML =
+              "❌ <strong>Erro na impressão:</strong><br>" + resultado.error;
+          }
+        } catch (error) {
+          document.getElementById("resultado").innerHTML =
+            "❌ <strong>Erro de conexão:</strong><br>" + error.message;
+        }
+      }
+
+      async function imprimirVoucherTeste() {
+        try {
+          document.getElementById("resultado").innerHTML =
+            "⏳ Imprimindo voucher de teste...";
+
+          const voucherTeste = {
+            codigo: "FIEP-2024-001",
+            nome_evento: "CONGRESSO NACIONAL FIEP 2024",
+            data_formatada: "15/12/2024",
+            data_expiracao: "31/12/2024",
+          };
+
+          const response = await fetch(
+            "http://localhost:3000/imprimir-voucher",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                voucher: voucherTeste,
+                cortar: true,
+              }),
+            }
+          );
+
+          const resultado = await response.json();
+
+          if (resultado.success) {
+            document.getElementById("resultado").innerHTML =
+              "✅ <strong>Voucher teste impresso e CORTADO!</strong> 🎉<br><br>" +
+              "Verifique na impressora se:<br>" +
+              "✓ Texto está legível<br>" +
+              "✓ Código está correto<br>" +
+              "✓ Papel foi cortado automaticamente<br><br>" +
+              `<small>Detalhes: ${JSON.stringify(resultado, null, 2)}</small>`;
+          } else {
+            document.getElementById("resultado").innerHTML =
+              "❌ <strong>Erro ao imprimir voucher:</strong><br>" +
+              resultado.error;
+          }
+        } catch (error) {
+          document.getElementById("resultado").innerHTML =
+            "❌ <strong>Erro de conexão:</strong><br>" + error.message;
+        }
+      }
+
+      // Verificar status automaticamente ao carregar
+      verificarStatus();
+    </script>
+  </body>
+</html>

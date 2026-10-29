@@ -1,0 +1,20 @@
+/* Botões, cards, chips, inputs, avisos */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:12px;padding:20px;box-shadow:var(--sh)}
+button,.btn{font:inherit;font-weight:600;min-height:56px;padding:0 24px;border-radius:10px;border:1px solid var(--bd);background:var(--sf);color:var(--tx);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;transition:transform .15s cubic-bezier(.2,.8,.2,1),background .15s}
+button:active{transform:scale(.98)}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #93C5FD;outline-offset:2px}
+.p{background:var(--pri);border-color:var(--pri);color:var(--onp);min-height:64px;font-size:20px;width:100%}.p:hover{background:var(--prih)}
+.g{background:transparent;border-color:transparent;color:var(--tx2)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}
+.chip{min-height:48px;border-radius:999px;padding:0 18px;font-weight:500;font-size:16px;background:var(--chip);border-color:transparent;color:var(--pri)}
+.chip.on{background:var(--pri);color:var(--onp)}
+input[type=text],select{font:inherit;width:100%;min-height:56px;padding:0 14px;border:1px solid var(--bd);border-radius:8px;background:var(--sf);color:var(--tx)}
+label{display:block;font-weight:600;margin-top:16px}
+.badge{display:inline-flex;gap:6px;align-items:center;padding:4px 12px;border-radius:999px;background:var(--chip);color:var(--pri);font-size:16px;font-weight:600}
+.badge.w{background:#FFEDD5;color:#9A3412}.badge.o{background:#DCFCE7;color:#166534}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;color:var(--tx2);font-size:16px}
+.toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:12px 20px;border-radius:10px;z-index:9;font-size:16px}
+.ov{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;align-items:center;justify-content:center;padding:24px}.ov .card{max-width:480px;width:100%}
+.dg{color:var(--err);border-color:var(--err)}
+.lb{position:fixed;inset:0;background:#000;z-index:30;overflow:auto;display:flex}.lb img{margin:auto;max-width:100%;max-height:100%;cursor:zoom-in}.lb img.z{max-width:none;max-height:none;width:200%;cursor:zoom-out}
+.lb button{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:31}

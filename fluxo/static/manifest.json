@@ -1,0 +1,24 @@
+{
+ "name": "Fluxo — Gestão de Operações de Espaços",
+ "short_name": "Fluxo",
+ "start_url": "/fluxo/",
+ "scope": "/fluxo/",
+ "display": "standalone",
+ "background_color": "#F7F8FA",
+ "theme_color": "#2563EB",
+ "lang": "pt-BR",
+ "icons": [
+  {
+   "src": "/fluxo/static/assets/icons/icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "any maskable"
+  },
+  {
+   "src": "/fluxo/static/assets/icons/icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}

@@ -1,0 +1,5 @@
+/* Design tokens: cores, tipografia, espaçamento. Tema claro/escuro. */
+:root{--bg:#F7F8FA;--sf:#fff;--pri:#2563EB;--prih:#1D4ED8;--ok:#16A34A;--warn:#EA580C;--err:#DC2626;--tx:#0F172A;--tx2:#475569;--tx3:#94A3B8;--bd:#E2E8F0;--sh:0 1px 2px rgba(16,24,40,.06),0 1px 3px rgba(16,24,40,.1);--chip:#EFF4FF;--onp:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);font-family:Inter,system-ui,sans-serif}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0B1220;--sf:#131C2E;--pri:#60A5FA;--prih:#93C5FD;--tx:#F1F5F9;--tx2:#CBD5E1;--tx3:#8091A9;--bd:#26324A;--chip:#1B2A4A;--onp:#0B1220;--sh:0 1px 2px rgba(0,0,0,.4)}}
+:root[data-theme=dark]{--bg:#0B1220;--sf:#131C2E;--pri:#60A5FA;--prih:#93C5FD;--tx:#F1F5F9;--tx2:#CBD5E1;--tx3:#8091A9;--bd:#26324A;--chip:#1B2A4A;--onp:#0B1220;--sh:0 1px 2px rgba(0,0,0,.4)}
